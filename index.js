@@ -1,10 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const crypto = require("crypto");
 const { MongoClient, ObjectId } = require("mongodb");
-const Web3 = require("web3");
-const MarketplaceABI = require("./src/abi/ACSMint-ABI.json");
 
 require("dotenv").config();
 
@@ -17,11 +14,6 @@ app.use(
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-// Load the ACSMContract
-const contractAddress = process.env.ACS_MARKETPLACE_ADDRESS;
-const web3 = new Web3(Web3.givenProvider || "https://rpc-mumbai.matic.today/");
-const ACSMContract = new web3.eth.Contract(MarketplaceABI, contractAddress);
 
 const client = new MongoClient(
   "mongodb+srv://Cori:9PYVUCGNnHItCC0Z@cori.8kxwk.mongodb.net/altcoinstaking?retryWrites=true&w=majority"
@@ -75,27 +67,6 @@ app.get("/api/admin/vote", async (req, res) => {
   const votesDoc = await voteCollection.find({}).toArray();
   votesJson.votes = votesDoc;
   res.json(votesJson);
-});
-
-app.put("/api/admin/vote/:id", async (req, res) => {
-  const userId = req.params.id;
-  let status = { success: false };
-
-  if (!connectedDB) {
-    console.log("=== mongodb connection is not established yet ===");
-    status.msg = "DB Connection failed!";
-    res.json(status);
-    return;
-  }
-  const db = client.db("altcoinstaking");
-  const voteCollection = db.collection("admin_vote");
-  const resUpdate = await voteCollection.findOneAndUpdate(
-    { _id: new ObjectId(userId) },
-    { $set: { quiz: req.body.vote_question, yesCnt: req.body.yesCnt, noCnt: req.body.noCnt } }
-  );
-  console.log("update", resUpdate);
-  status.success = true;
-  res.json(status);
 });
 
 // Delete the vote question with ID and address vote list related to this vote question

@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "forever start -w index.js",
+    "list": "forever list",
+    "stop": "forever stop 0",
+    "restart": "forever restart 0"
   },
   "keywords": [],
   "author": "",
