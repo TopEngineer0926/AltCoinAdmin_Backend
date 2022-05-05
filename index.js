@@ -135,6 +135,49 @@ app.post("/api/address/vote", async (req, res) => {
   res.json(status);
 });
 
+
+// Save the selected vote
+app.post("/api/admin/selected_vote", async (req, res) => {
+  let status = {
+    success: true
+  };
+
+  const db = client.db("altcoinstaking");
+  const selectedVoteCollection = db.collection("selected_vote");
+  let vote = {
+    qId: req.body.qId
+  }
+  let selectedVote = await selectedVoteCollection.find({}).toArray();
+
+  if (selectedVote.length > 0) {
+    await selectedVoteCollection.deleteMany({});
+  }
+
+  await selectedVoteCollection.insertOne(vote);
+  res.json(status);
+});
+
+// Get the selected vote
+app.get("/api/admin/selected_vote", async (req, res) => {
+  let votesJson = { votes: [] };
+
+  if (!connectedDB) {
+    console.log("=== mongodb connection is not established yet ===");
+    res.json(votesJson);
+    return;
+  }
+  const db = client.db("altcoinstaking");
+  const selectedVoteCollection = db.collection("selected_vote");
+  const selectedVoteDoc = await selectedVoteCollection.findOne({});
+  const qId = selectedVoteDoc?.qId;
+
+  const voteCollection = db.collection("admin_vote");
+  const votesDoc = await voteCollection.find({_id: new ObjectId(qId)}).toArray();
+  console.log("======votesDoc:", votesDoc);
+  votesJson.votes = votesDoc;
+  res.json(votesJson);
+});
+
 app.listen(process.env.PORT, () =>
   console.log("Your app is listening on port " + process.env.PORT)
 );
