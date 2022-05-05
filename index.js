@@ -169,7 +169,7 @@ app.get("/api/admin/selected_vote", async (req, res) => {
   const db = client.db("altcoinstaking");
   const selectedVoteCollection = db.collection("selected_vote");
   const selectedVoteDoc = await selectedVoteCollection.findOne({});
-  const qId = selectedVoteDoc?.qId;
+  const qId = selectedVoteDoc.qId;
 
   const voteCollection = db.collection("admin_vote");
   const votesDoc = await voteCollection.find({_id: new ObjectId(qId)}).toArray();
